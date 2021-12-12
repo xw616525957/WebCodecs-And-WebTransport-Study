@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Codedecs</title>
+</head>
+<body>
+    <script type="module">
+        import { FLVDemux, Events } from '../node_modules/demuxer/dist/demuxer.flv.esm.js'
+
+        function handleFrame (frame, metadata) {
+            console.log('handleFrame')
+        }
+        const initDecoder = {
+            output: handleFrame,
+            error: (e) => {
+            console.log(e.message);
+            }
+        };
+        
+        const configDecoder = {
+            codec: 'avc1.42E00C',
+            codedWidth: 320,
+            codedHeight: 180
+        };
+        
+        let decoder = new VideoDecoder(initDecoder);
+        decoder.configure(configDecoder);
+
+        const demux = new FLVDemux({
+            debug: true
+        })
+        demux.on(Events.DEMUX_DATA, (e) => {
+            //console.log(e);
+            if (e.tagType === 9) {
+                if (e.videoData.payload.length < 100) {
+                    return
+                }
+                let trunk = new EncodedVideoChunk({
+                    timestamp: 3000 + e.timestamp,
+                    type: e.isKeyframe ? 'key' : 'delta',
+                    duration: 3000,
+                    data: e.videoData.payload
+                })
+                try {
+                    decoder.decode(trunk)
+                }
+                catch (e) {
+                    console.error(e)
+                }
+            }
+        })
+        
+        demux.on(Events.DONE, (e) => {
+            // consumed & flushed all piped buffer.
+        })
+        
+        fetch('').then(res => {
+            let reader = res.body?.getReader()
+            reader && process(reader)
+        })
+        
+        async function process(reader) {
+            let buffer = await reader.read()
+            if (buffer) {
+                // buffer -> video bytes ArrayBuffer
+                demux.push(buffer.value, {
+                    // Support push part of the data for parsing
+                    // When done is set to true, if the data is decoded and there is no remaining data, the data is considered to have been pushed and Events.DONE will be emitted.
+                    // When done is set to false, Events.DONE will not be emit, waiting for subsequent data push
+                    done: false
+                })
+            }
+            process(reader)
+        }
+
+    </script>
+</body>
+</html>

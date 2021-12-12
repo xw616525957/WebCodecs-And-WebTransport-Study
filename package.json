@@ -1,0 +1,26 @@
+{
+  "name": "WebCodecs-And-WebTransport-Study",
+  "version": "1.0.0",
+  "description": "WebCodecs and WebTransport Note and Demo",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xw616525957/WebCodecs-And-WebTransport-Study.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/xw616525957/WebCodecs-And-WebTransport-Study/issues"
+  },
+  "homepage": "https://github.com/xw616525957/WebCodecs-And-WebTransport-Study#readme",
+  "devDependencies": {
+    "typescript": "^4.5.3"
+  },
+  "dependencies": {
+    "demuxer": "^2.2.5"
+  }
+}
